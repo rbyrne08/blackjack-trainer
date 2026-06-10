@@ -108,8 +108,11 @@ export interface GameState {
   roundsSinceShuffle: number;
   /** Per-hand results, populated on entry to settlement. */
   outcomes: HandOutcome[];
-  /** Insurance result for the round: net change from the insurance side bet. */
-  insuranceNet: number;
+  /**
+   * Net change from the insurance side bet once resolved; null while an
+   * insurance bet is still pending (ENHC resolves it at hole-card reveal).
+   */
+  insuranceNet: number | null;
 }
 
 export type GameEvent =
