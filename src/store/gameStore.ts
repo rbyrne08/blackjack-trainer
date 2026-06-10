@@ -169,10 +169,15 @@ export const useGameStore = create<GameStore>()((set, get) => ({
     })),
 }));
 
-/** A scheduled quiz is due before the next deal (and always before a shuffle). */
+/**
+ * A scheduled quiz is due before the next deal (and always before a shuffle).
+ * quizEveryNRounds <= 0 means quizzes are off entirely — the manual
+ * "Check my count" button still works.
+ */
 export function quizIsDue(store: Pick<GameStore, 'game' | 'roundsSinceQuiz' | 'lastQuizAtDealtCount'>): boolean {
   const { prefs } = useSettingsStore.getState();
   if (!prefs.countingMode) return false;
+  if (prefs.quizEveryNRounds <= 0) return false;
   const { game } = store;
   if (game.phase !== 'betting' || game.dealtCount === 0) return false;
   if (store.lastQuizAtDealtCount === game.dealtCount) return false;

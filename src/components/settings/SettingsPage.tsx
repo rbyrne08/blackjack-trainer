@@ -154,9 +154,15 @@ export function SettingsPage() {
           />
         </SettingRow>
 
-        <SettingRow name="Quiz every" hint="A count check also always fires before each shuffle.">
+        <SettingRow
+          name="Quiz every"
+          hint="When on, a count check also fires before each shuffle. Off = no quizzes; use 'Check my count' to self-test anytime."
+        >
           <Segmented
-            options={[2, 3, 4, 6, 8].map((n) => ({ value: n, label: `${n} rounds` }))}
+            options={[
+              { value: 0, label: 'Off' },
+              ...[2, 3, 4, 6, 8].map((n) => ({ value: n, label: `${n} rounds` })),
+            ]}
             value={prefs.quizEveryNRounds}
             onChange={(v) => setPrefs({ quizEveryNRounds: v })}
           />
