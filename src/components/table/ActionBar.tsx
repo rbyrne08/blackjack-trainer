@@ -3,7 +3,10 @@ import { actionLabel } from '../../lib/format';
 import { useGameStore } from '../../store/gameStore';
 import type { Action } from '../../engine/types';
 
+// Only legal + affordable actions render; e.g. Split appears solely on pairs
+// (any two ten-value cards count as a pair) and Double only on two-card hands.
 const ORDER: Action[] = ['hit', 'stand', 'double', 'split', 'surrender'];
+
 const HOTKEYS: Record<Action, string> = {
   hit: 'H',
   stand: 'S',
@@ -22,11 +25,12 @@ export function ActionBar() {
       {ORDER.filter((a) => actions.has(a)).map((action) => (
         <button
           key={action}
-          className="btn"
+          className={`btn action-btn action-${action}`}
           title={`Shortcut: ${HOTKEYS[action]}`}
           onClick={() => playerAct(action)}
         >
           {actionLabel(action)}
+          <kbd>{HOTKEYS[action]}</kbd>
         </button>
       ))}
     </div>
