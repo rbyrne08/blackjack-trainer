@@ -4,6 +4,13 @@ import { useGameStore } from '../../store/gameStore';
 import type { Action } from '../../engine/types';
 
 const ORDER: Action[] = ['hit', 'stand', 'double', 'split', 'surrender'];
+const HOTKEYS: Record<Action, string> = {
+  hit: 'H',
+  stand: 'S',
+  double: 'D',
+  split: 'P',
+  surrender: 'R',
+};
 
 export function ActionBar() {
   const game = useGameStore((s) => s.game);
@@ -13,7 +20,12 @@ export function ActionBar() {
   return (
     <div className="action-bar">
       {ORDER.filter((a) => actions.has(a)).map((action) => (
-        <button key={action} className="btn" onClick={() => playerAct(action)}>
+        <button
+          key={action}
+          className="btn"
+          title={`Shortcut: ${HOTKEYS[action]}`}
+          onClick={() => playerAct(action)}
+        >
           {actionLabel(action)}
         </button>
       ))}

@@ -1,6 +1,6 @@
 import { handValue, isBlackjack } from '../../engine/hand';
 import { fmtMoney } from '../../lib/format';
-import type { GameState, HandOutcome, PlayerHand } from '../../engine/types';
+import type { HandOutcome, PlayerHand } from '../../engine/types';
 import { PlayingCard } from './PlayingCard';
 
 const RESULT_LABELS: Record<HandOutcome['result'], string> = {
@@ -53,9 +53,4 @@ export function PlayerHandView({
       </div>
     </div>
   );
-}
-
-export function outcomeFor(game: GameState, handIndex: number): HandOutcome | null {
-  if (game.phase !== 'settlement') return null;
-  return game.outcomes.find((o) => o.handIndex === handIndex) ?? null;
 }

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { rulesHash } from '../../engine/rules';
 import { fmtMoney } from '../../lib/format';
+import type { Action, GameState, HandOutcome } from '../../engine/types';
 import { quizIsDue, useGameStore } from '../../store/gameStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { CountHud } from '../counting/CountHud';
@@ -11,9 +12,14 @@ import { DealerArea } from './DealerArea';
 import { EvPanel } from './EvPanel';
 import { FeedbackBanner } from './FeedbackBanner';
 import { InsurancePrompt } from './InsurancePrompt';
-import { PlayerHandView, outcomeFor } from './PlayerHandView';
+import { PlayerHandView } from './PlayerHandView';
 
 const DEALER_STEP_MS = 650;
+
+function outcomeFor(game: GameState, handIndex: number): HandOutcome | null {
+  if (game.phase !== 'settlement') return null;
+  return game.outcomes.find((o) => o.handIndex === handIndex) ?? null;
+}
 
 function rulesSummary(hash: string): string {
   return hash
@@ -62,6 +68,36 @@ export function GameTable() {
     if (due && !quizOpen) openQuiz(false);
     // countingMode/quizEveryNRounds affect `due` via quizIsDue's getState read
   }, [due, quizOpen, openQuiz, countingMode, quizEveryNRounds]);
+
+  // Keyboard shortcuts: H/S/D/P/R during play, Y/N for insurance,
+  // Enter/Space for the next hand.
+  useEffect(() => {
+    const KEY_ACTIONS: Record<string, Action> = {
+      h: 'hit',
+      s: 'stand',
+      d: 'double',
+      p: 'split',
+      r: 'surrender',
+    };
+    const onKey = (e: KeyboardEvent) => {
+      const store = useGameStore.getState();
+      if (store.quizOpen) return;
+      const target = e.target as HTMLElement | null;
+      if (target && ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName)) return;
+      const key = e.key.toLowerCase();
+      const phase = store.game.phase;
+      if (phase === 'playerTurn' && KEY_ACTIONS[key]) {
+        store.playerAct(KEY_ACTIONS[key]); // no-op when not available
+      } else if (phase === 'insurance' && (key === 'y' || key === 'n')) {
+        store.decideInsurance(key === 'y');
+      } else if (phase === 'settlement' && (key === 'enter' || key === ' ')) {
+        e.preventDefault();
+        store.nextRound();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const roundNet =
     game.phase === 'settlement'
