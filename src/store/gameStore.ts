@@ -39,6 +39,9 @@ interface GameStore {
   game: GameState;
   lastGrade: GradedDecision | null;
   lastInsurance: GradedInsurance | null;
+  /** The bet being composed in the betting phase (chips UI + deal button). */
+  pendingBet: number;
+  setPendingBet(amount: number): void;
   /** Rounds completed since the player last answered a count quiz. */
   roundsSinceQuiz: number;
   /** dealtCount at the moment of the last answered/dismissed quiz. */
@@ -61,6 +64,11 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   game: createInitialState(useSettingsStore.getState().rules, rng),
   lastGrade: null,
   lastInsurance: null,
+  pendingBet: 10,
+  setPendingBet: (amount) =>
+    set((state) => ({
+      pendingBet: Math.max(0, Math.min(amount, state.game.bankroll)),
+    })),
   roundsSinceQuiz: 0,
   lastQuizAtDealtCount: -1,
   quizOpen: false,

@@ -237,8 +237,9 @@ input:focus, select:focus, button:focus-visible {
   background: var(--felt-900);
   border: 1px solid var(--line-strong);
   border-radius: 999px;
-  padding: 2px 11px;
-  font-weight: 700;
+  padding: 4px 16px;
+  font-weight: 800;
+  font-size: 18px;
   font-variant-numeric: tabular-nums;
 }
 .total-chip.bust { color: var(--red); border-color: var(--red); }
@@ -251,16 +252,24 @@ input:focus, select:focus, button:focus-visible {
 
 .result-tag {
   position: absolute;
-  top: -10px;
+  top: -18px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   border-radius: 999px;
-  padding: 3px 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  padding: 6px 20px;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  z-index: 4;
+  animation: tag-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tag-pop {
+  from { transform: translateX(-50%) scale(0.4); opacity: 0; }
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 .result-tag.win, .result-tag.blackjack { background: var(--green); color: #06130b; }
 .result-tag.lose { background: var(--red); color: #1d0703; }
@@ -471,6 +480,40 @@ input:focus, select:focus, button:focus-visible {
   color: var(--gold-bright);
   font-size: 12.5px;
   letter-spacing: 0.06em;
+}
+
+/* Empty player spot during betting: ghost cards + overlaid Deal button. */
+.hand.deal-spot .pcard {
+  opacity: 0.22;
+  animation: none;
+}
+.deal-overlay-btn {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  padding: 17px 52px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #2a2008;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.5),
+    0 0 0 6px rgba(217, 180, 91, 0.16);
+  transition: transform 0.1s ease, box-shadow 0.15s ease, opacity 0.15s;
+}
+.deal-overlay-btn:not(:disabled):hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.55),
+    0 0 0 9px rgba(217, 180, 91, 0.22);
+}
+.deal-overlay-btn:not(:disabled):active {
+  transform: translate(-50%, -52%) scale(0.99);
 }
 
 .settle-summary {

@@ -1,17 +1,19 @@
-import { useState } from 'react';
 import { fmtMoney } from '../../lib/format';
 import { useGameStore } from '../../store/gameStore';
 import { BetAdviceChip } from '../counting/BetAdviceChip';
 
 const CHIPS = [5, 10, 25, 100] as const;
 
+/**
+ * Chip controls for composing the bet. The big Deal button itself is overlaid
+ * on the table (see GameTable); both share the store's pendingBet.
+ */
 export function BetControls() {
   const game = useGameStore((s) => s.game);
-  const placeBet = useGameStore((s) => s.placeBet);
+  const pendingBet = useGameStore((s) => s.pendingBet);
+  const setPendingBet = useGameStore((s) => s.setPendingBet);
   const rebuy = useGameStore((s) => s.rebuy);
-  const [bet, setBet] = useState(() => Math.min(game.baseBet, Math.max(game.bankroll, 0)));
 
-  const canDeal = bet >= 1 && bet <= game.bankroll;
   const broke = game.bankroll < 1;
 
   return (
@@ -19,30 +21,26 @@ export function BetControls() {
       {game.needsShuffle && game.dealtCount > 0 && (
         <div className="shuffle-note">⟳ Shuffling a fresh shoe before the next deal</div>
       )}
-      <BetAdviceChip onApply={(amount) => setBet(Math.min(amount, game.bankroll))} />
-      <div className="bet-amount">Bet: {fmtMoney(bet)}</div>
+      <BetAdviceChip onApply={(amount) => setPendingBet(amount)} />
+      <div className="bet-amount">Bet: {fmtMoney(pendingBet)}</div>
       <div className="chip-row">
         {CHIPS.map((c) => (
           <button
             key={c}
             className={`chip c${c}`}
-            onClick={() => setBet((b) => Math.min(b + c, game.bankroll))}
+            onClick={() => setPendingBet(pendingBet + c)}
             disabled={broke}
           >
             +{c}
           </button>
         ))}
-        <button className="btn ghost" onClick={() => setBet(0)} disabled={broke}>
+        <button className="btn ghost" onClick={() => setPendingBet(0)} disabled={broke}>
           Clear
         </button>
       </div>
-      {broke ? (
+      {broke && (
         <button className="btn primary" onClick={rebuy}>
           Rebuy $1,000
-        </button>
-      ) : (
-        <button className="btn primary" disabled={!canDeal} onClick={() => placeBet(bet)}>
-          Deal
         </button>
       )}
     </div>

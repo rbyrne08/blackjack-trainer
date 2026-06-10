@@ -21,6 +21,25 @@ function outcomeFor(game: GameState, handIndex: number): HandOutcome | null {
   return game.outcomes.find((o) => o.handIndex === handIndex) ?? null;
 }
 
+/** Big gold Deal button overlaid on the empty player spot during betting. */
+function DealButton() {
+  const game = useGameStore((s) => s.game);
+  const pendingBet = useGameStore((s) => s.pendingBet);
+  const placeBet = useGameStore((s) => s.placeBet);
+  if (game.phase !== 'betting' || game.bankroll < 1) return null;
+  const canDeal = pendingBet >= 1 && pendingBet <= game.bankroll;
+  return (
+    <button
+      className="deal-overlay-btn"
+      disabled={!canDeal}
+      title={canDeal ? 'Deal (Enter)' : 'Add chips to your bet first'}
+      onClick={() => placeBet(pendingBet)}
+    >
+      Deal
+    </button>
+  );
+}
+
 function rulesSummary(hash: string): string {
   return hash
     .replace(/^d(\d)/, '$1 decks')
@@ -93,6 +112,12 @@ export function GameTable() {
       } else if (phase === 'settlement' && (key === 'enter' || key === ' ')) {
         e.preventDefault();
         store.nextRound();
+      } else if (phase === 'betting' && (key === 'enter' || key === ' ')) {
+        const bet = store.pendingBet;
+        if (bet >= 1 && bet <= store.game.bankroll) {
+          e.preventDefault();
+          store.placeBet(bet);
+        }
       }
     };
     window.addEventListener('keydown', onKey);
@@ -118,13 +143,14 @@ export function GameTable() {
       <div className="player-area">
         <div className="hands-row">
           {game.hands.length === 0 ? (
-            <div className="hand">
+            <div className="hand deal-spot">
               <div className="card-row">
-                <div className="pcard down" style={{ opacity: 0.25 }} />
-                <div className="pcard down" style={{ opacity: 0.25 }} />
+                <div className="pcard down" />
+                <div className="pcard down" />
               </div>
+              <DealButton />
               <div className="hand-meta">
-                <span className="bet-chip">Place a bet to deal</span>
+                <span className="bet-chip">Stack chips below, then deal</span>
               </div>
             </div>
           ) : (
@@ -143,7 +169,7 @@ export function GameTable() {
 
       <div className="controls-slot">
         {game.phase === 'playerTurn' && showEvPanel && <EvPanel />}
-        {game.phase === 'betting' && <BetControls key={game.roundsSinceShuffle} />}
+        {game.phase === 'betting' && <BetControls />}
         {game.phase === 'insurance' && <InsurancePrompt />}
         {game.phase === 'playerTurn' && <ActionBar />}
         {game.phase === 'dealerTurn' && (
